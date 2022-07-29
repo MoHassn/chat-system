@@ -1,4 +1,38 @@
 class MessagesController < ApplicationController
+  def index
+    @application = Application.find_by(token:  params[:application_id])
+    if !@application
+      return render json: { :message => "application not found" }.to_json, status: :not_found
+    end
+
+    @chat = Chat.find_by(application: @application.id, number: params[:chat_id])
+
+    if !@chat
+      return render json: { :message => "chat not found" }.to_json, status: :not_found
+    end
+    
+    @messages = Message.search(
+      query: {
+        bool: {
+          must: [
+            {
+              match: {
+                body: params[:query]
+              }
+            }
+          ], 
+          filter: [
+            {
+              term: {
+                "chat_id":  @chat.id
+              }
+            }
+          ]     
+        }
+    }).records
+    render json: @messages.to_json(:except => [:id, :chat_id])
+  end
+
   
   def create
     @application = Application.find_by(token:  params[:application_id])

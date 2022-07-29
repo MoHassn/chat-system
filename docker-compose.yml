@@ -12,6 +12,21 @@ services:
             - "3308:3306"
         volumes:
             - ./db:/db
+    es:
+        image: elasticsearch:8.3.2
+        restart: always
+        environment:
+        - xpack.security.enabled=false
+        - discovery.type=single-node
+   
+        ulimits:
+          memlock:
+            soft: -1
+            hard: -1
+        ports:
+            - "9202:9200"
+        volumes:
+            - ./es:/es
     app: 
         build: .
         command: bash -c "build-scripts/container/web"
@@ -21,10 +36,14 @@ services:
             - "3001:3000"
         depends_on:
             - db
+            - es
         environment:
             RAILS_ENV: development
             DB_USER: root
             DB_NAME: app
             DB_PASSWORD: password
             DB_HOST: db
+            ES_HOST: es
+            # ES_USER: elastic
+            # ES_PASSWORD: elastic
 
