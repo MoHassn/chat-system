@@ -46,7 +46,14 @@ class MessagesController < ApplicationController
       return render json: { :message => "chat not found" }.to_json, status: :not_found
     end
     number = get_message_number(@chat.id)
- 
+
+    # message = {
+    #   "chat" =>  @chat.id,
+    #   "number" => number,
+    #   "body" =>  params[:body]
+    # }
+
+    # publish_message message.to_json
     @chat.messages.create(number: number, body: params[:body])
 
     render json: {message_number: number}, status: :created
@@ -61,6 +68,16 @@ class MessagesController < ApplicationController
       chat.save!
       message_number
     end
+  end
+
+  def publish_message message_body
+    conn = Bunny.new
+    conn.start
+    ch   = conn.create_channel
+    queue = ch.queue('messages')
+    ch.default_exchange.publish(message_body, routing_key: queue.name)
+    ch.close
+    conn.close
   end
   
 end

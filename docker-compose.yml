@@ -27,6 +27,23 @@ services:
             - "9202:9200"
         volumes:
             - ./es:/es
+    rmq:
+        image: rabbitmq:3.9.11-management
+        restart: always
+        volumes:
+          - ./volumes/rabbitmq:/var/lib/rabbitmq
+        environment:
+            - RABBITMQ_NODE_TYPE=stats
+            - RABBITMQ_NODE_NAME=rabbit@stats
+            - RABBITMQ_ERL_COOKIE=s3cr3tc00ki3
+            - RABBITMQ_DEFAULT_USER=rabbitmquser
+            - RABBITMQ_DEFAULT_PASS=rabbitmquser
+        # ports:
+        #     - "4369:4369"
+        #     - "5672:5672"
+        #     - "15672:15672"
+        #     - "25672:25672"
+        #     - "35197:35197"
     app: 
         build: .
         command: bash -c "build-scripts/container/web"
@@ -37,6 +54,7 @@ services:
         depends_on:
             - db
             - es
+            - rmq
         environment:
             RAILS_ENV: development
             DB_USER: root
@@ -44,6 +62,5 @@ services:
             DB_PASSWORD: password
             DB_HOST: db
             ES_HOST: es
-            # ES_USER: elastic
-            # ES_PASSWORD: elastic
+            RABBITMQ_HOST: rmq
 
