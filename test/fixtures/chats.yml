@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  number: 1
+  message_count: 1
+  next_message_count: 1
+  application: one
+
+two:
+  number: 1
+  message_count: 1
+  next_message_count: 1
+  application: two
